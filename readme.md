@@ -21,6 +21,8 @@ Adafruit library for I2C communication required by servo driver
 * cv2  
 `sudo apt-get install libopencv-dev python-opencv python-dev`
 
+Copy the two adafruit libraries into your sniper folder
+
 ##Hardware required
 * Raspberry Pi  
 Pi 2 or above, to allow for processing power when detecting faces
@@ -55,9 +57,6 @@ This wil display a live feed from camera.
 ###Test opencv
 Run `python testcv.py` to test cv installation.  
 This will print version number.
-
-###Setup opencv
-*TODO*
 
 ##*TODO* List
 Further requirements:
