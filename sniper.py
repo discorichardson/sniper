@@ -8,6 +8,18 @@ import RPi.GPIO as GPIO
 
 laser_pin=21
 
+ledr=6
+ledg=5
+ledb=4
+ledx=0
+
+def set_rgb(led):
+    pwm.setPWM(ledr,4095,0)
+    pwm.setPWM(ledg,4095,0)
+    pwm.setPWM(ledb,4095,0)
+    if led!=ledx:
+        pwm.setPWM(led,0,4095)
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(laser_pin,GPIO.OUT)
 GPIO.output(laser_pin, False)
@@ -21,11 +33,17 @@ GPIO.output(laser_pin, False)
 window=True
 # lowres True to use low res image, False to use higher res image
 # low res is quicker to process
-lowres=True
+lowres=False
+# Enable laser fire
+enable_laser=False
 
 target_width=160 #mm
 
+if enable_laser:
+    print 'LASER ENABLED'
+
 if lowres:
+    print 'lowres'
     # resx, image width in pixels
     resx=160
     # resy, image height in pixels
@@ -36,6 +54,7 @@ if lowres:
     # I can't remember how I came up with these figures!
     sm.set_focal_length(157.0)
 else:
+    print 'highres'
     resx=320
     resy=240
     killzone=10
@@ -54,9 +73,8 @@ anglex=anglex_center
 # centre of vertical hunting arc
 angley_center=60
 # top
-angley_min=angley_center-30
+angley_min=angley_center-45
 # bottom
-#angley_max=angley_center+10
 angley_max=angley_center
 # current vertical angle of turret
 angley=angley_center
@@ -96,11 +114,13 @@ with picamera.PiCamera() as camera:
     acquired=False
     # Set confirmed if target in centre of image
     confirmed=False
+
+    set_rgb(ledb)
     while not finished:
         # Turn camera led on if target acquired
         camera.led=acquired
         # Fire laser if target found
-        GPIO.output(laser_pin, confirmed)
+        GPIO.output(laser_pin, confirmed and enable_laser)
 
         #take photo
         with picamera.array.PiRGBArray(camera) as stream:
@@ -150,9 +170,8 @@ with picamera.PiCamera() as camera:
             targety=yt+ht/2
             # Get distance from camera to target
             distance=sm.get_distance(wt,target_width)
-            print distance/1000
+            #print distance/1000
             # is centre of target in our kill zone?
-            #FIXME I need to understand this and work out if it's right!
             if abs(targetx-resx/2)<killzone and abs(targety-resy/2)<killzone:
                 confirmed=True
                 if window:
@@ -162,15 +181,18 @@ with picamera.PiCamera() as camera:
                 if window:
                     cv2.rectangle(image,(xt,yt),(xt+wt,yt+ht),(0,255,0),2) #green
 
-            #following calcs add distance from hinge for calculation
-            #FIXME again, I need to understand this (it's not working)
+            # following calcs add distance from hinge for calculation
             if targetx<resx/2:
+                if not confirmed: print 'left'
                 anglex+=sm.get_angle(resx/2-targetx,distance+40)
             elif targetx>resx/2:
+                if not confirmed: print 'right'
                 anglex-=sm.get_angle(targetx-resx/2,distance+40)
             if targety>resy/2:
+                if not confirmed: print 'down'
                 angley+=sm.get_angle(targety-resy/2,distance+20)
             elif targety<resy/2:
+                if not confirmed: print 'up'
                 angley-=sm.get_angle(resy/2-targety,distance+20)
         else:
             # If no image acquired then keep searching for an image!
@@ -191,12 +213,15 @@ with picamera.PiCamera() as camera:
         if angley<angley_min:
             angley=angley_min
 
-        #if confirmed:
-        #    print 'Confirmed Shot'
-        #elif acquired:
-        #    print 'Target Acquired'
-        #else:
-        #    print 'Hunting...'
+        if confirmed:
+            print 'Confirmed Shot'
+            set_rgb(ledr)
+        elif acquired:
+            print 'Target Acquired'
+            set_rgb(ledg)
+        else:
+            print 'Hunting...'
+            set_rgb(ledb)
 
         #FIXME I should calibrate following equation to my servos
         pulse_len=int(float(anglex)*210.0/90.0)+184
@@ -224,3 +249,5 @@ with picamera.PiCamera() as camera:
     pwm.setPWM(0,0,pulse_len) #side movement 26=right center=103 180=left
     pulse_len=int(float(angley_center)*210.0/90.0)+184
     pwm.setPWM(2,0,pulse_len) #vertical bottom=122 center=82 top=42
+
+    set_rgb(ledx)
