@@ -13,7 +13,8 @@ Library to compute width of an object, distance from camera and angle required t
 ##Third party libraries required
 * Adafruit_Python_PCA9685  
 Adafruit library for controlling servo board PCA9685
-```git clone https://github.com/adafruit/Adafruit_Python_PCA9685
+```
+git clone https://github.com/adafruit/Adafruit_Python_PCA9685.git
 cd Adafruit_Python_PCA9685
 sudo python setup.py install
 ```
@@ -62,7 +63,7 @@ This will print version number.
 ##*TODO* List
 Further requirements:
 
-* Transistor to switch laser on and off
+* Transistor to switch laser on and off (code done, not documented above)
 * Safety switch to disable laser
 * Case
 * Power
