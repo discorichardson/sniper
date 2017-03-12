@@ -11,17 +11,18 @@ Program to seek faces and shoot at them with a *laser*
 Library to compute width of an object, distance from camera and angle required to move a certain number of pixels
 
 ##Third party libraries required
-* Adafruit_PWM_Servo_Driver.py  
-Adafruit library for controlling servo board PCA9685  
-`git clone https://github.com/adafruit/Adafruit-Raspberry-Pi-Python=Code.git`
-* Adafruit_I2C.py  
-Adafruit library for I2C communication required by servo driver
+* Adafruit_Python_PCA9685  
+Adafruit library for controlling servo board PCA9685
+```git clone https://github.com/adafruit/Adafruit_Python_PCA9685
+cd Adafruit_Python_PCA9685
+sudo python setup.py install
+```
+or  
+`sudo pip install adafruit-pca9685`
 * picamera  
 `sudo apt-get install python-picamera`
 * cv2  
 `sudo apt-get install libopencv-dev python-opencv python-dev`
-
-Copy the two adafruit libraries into your sniper folder
 
 ##Hardware required
 * Raspberry Pi  

@@ -2,23 +2,25 @@ import picamera #sudo apt-get install python-picamera
 import picamera.array
 import cv2 #sudo apt-get install libopencv-dev python-opencv python-dev
 import sniper_math as sm
-from Adafruit_PWM_Servo_Driver import PWM #git clone https://github.com/adafruit/Adafruit-Raspberry-Pi-Python=Code.git
+import Adafruit_PCA9685 #see readme.md
 from time import sleep
 import RPi.GPIO as GPIO
 
 laser_pin=21
 
+#set pwm channels for rgb led
 ledr=6
 ledg=5
 ledb=4
+#Sending a 0 turns led off (yes, I know there's a channel 0)
 ledx=0
 
 def set_rgb(led):
-    pwm.setPWM(ledr,4095,0)
-    pwm.setPWM(ledg,4095,0)
-    pwm.setPWM(ledb,4095,0)
+    pwm.set_pwm(ledr,0,0)
+    pwm.set_pwm(ledg,0,0)
+    pwm.set_pwm(ledb,0,0)
     if led!=ledx:
-        pwm.setPWM(led,0,4095)
+        pwm.set_pwm(led,0,4095)
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(laser_pin,GPIO.OUT)
@@ -41,6 +43,9 @@ target_width=160 #mm
 
 if enable_laser:
     print 'LASER ENABLED'
+else:
+    print 'Software Safety On'
+
 
 if lowres:
     print 'lowres'
@@ -87,8 +92,8 @@ huntx=huntd
 hunty=-huntd
 
 # Set up pwm
-pwm=PWM(0x40)
-pwm.setPWMFreq(50)
+pwm = Adafruit_PCA9685.PCA9685()
+pwm.set_pwm_freq(50)
 
 # If in windowed environment open a window with image preview
 if window:
@@ -225,9 +230,9 @@ with picamera.PiCamera() as camera:
 
         #FIXME I should calibrate following equation to my servos
         pulse_len=int(float(anglex)*210.0/90.0)+184
-        pwm.setPWM(0,0,pulse_len) #side movement 26=right center=103 180=left
+        pwm.set_pwm(0,0,pulse_len) #side movement 26=right center=103 180=left
         pulse_len=int(float(angley)*210.0/90.0)+184
-        pwm.setPWM(2,0,pulse_len) #vertical bottom=122 center=82 top=42
+        pwm.set_pwm(2,0,pulse_len) #vertical bottom=122 center=82 top=42
 
         #save image
         #cv2.imwrite('result.jpg',image)
@@ -246,8 +251,8 @@ with picamera.PiCamera() as camera:
 
     #Centre Camera
     pulse_len=int(float(anglex_center)*210.0/90.0)+184
-    pwm.setPWM(0,0,pulse_len) #side movement 26=right center=103 180=left
+    pwm.set_pwm(0,0,pulse_len) #side movement 26=right center=103 180=left
     pulse_len=int(float(angley_center)*210.0/90.0)+184
-    pwm.setPWM(2,0,pulse_len) #vertical bottom=122 center=82 top=42
+    pwm.set_pwm(2,0,pulse_len) #vertical bottom=122 center=82 top=42
 
     set_rgb(ledx)
